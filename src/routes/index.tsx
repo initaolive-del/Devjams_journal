@@ -77,11 +77,11 @@ function NotebooksHome() {
             {notebooks.map((n) => {
               const c = colorOf(n.color);
               return (
-                <li key={n.id} className="fade-slide-in">
+                <li key={n.id} className="fade-slide-in rounded-3xl border border-border bg-card">
                   <button
                     type="button"
                     onClick={() => navigate({ to: "/notebook/$id", params: { id: n.id } })}
-                    className="flex w-full items-center gap-4 rounded-3xl border border-border bg-card p-4 text-left transition-transform active:scale-[0.98]"
+                    className="flex w-full items-center gap-4 rounded-3xl p-4 text-left transition-transform active:scale-[0.98]"
                   >
                     <span
                       className="grid size-14 shrink-0 place-items-center rounded-2xl text-2xl"
@@ -103,10 +103,23 @@ function NotebooksHome() {
                       </span>
                     </span>
                   </button>
+                  <div className="border-t border-border px-4 py-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate({ to: "/notebook/$id/summary", params: { id: n.id } })
+                      }
+                      className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold text-accent-foreground transition-transform active:scale-95"
+                    >
+                      <Sparkles className="size-3.5" aria-hidden />
+                      View AI Summary
+                    </button>
+                  </div>
                 </li>
               );
             })}
           </ul>
+
 
           {notebooks.length === 0 && (
             <div className="rounded-3xl border-2 border-dashed border-input bg-card p-10 text-center">
