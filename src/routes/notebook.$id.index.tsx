@@ -50,8 +50,9 @@ function NotebookCalendar() {
   const today = new Date();
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [dir, setDir] = useState(1);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [recapOpen, setRecapOpen] = useState(false);
+
 
   const year = cursor.getFullYear();
   const month = cursor.getMonth();
