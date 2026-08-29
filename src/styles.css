@@ -151,3 +151,47 @@
 @utility mic-listening {
   animation: mic-pulse 1.4s ease-in-out infinite;
 }
+
+@keyframes recap-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@utility recap-overlay {
+  animation: overlay-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@utility recap-cell {
+  animation: recap-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+  &:hover {
+    transform: scale(1.04);
+    box-shadow: 0 8px 20px oklch(0.32 0.055 195 / 18%);
+  }
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+@utility slide-fade {
+  animation: fade-slide-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
