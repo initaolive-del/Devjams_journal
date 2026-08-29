@@ -19,9 +19,11 @@ import {
   toDateKey,
   useEntry,
   useNotebook,
+  useNotebookEntries,
   useSaveEntry,
   type Mood,
 } from "@/lib/journal";
+import { JournalPromptCard } from "@/components/JournalPromptCard";
 
 export const Route = createFileRoute("/notebook/$id/entry/$date")({
   head: ({ params }) => ({
@@ -57,6 +59,12 @@ function EntryPage() {
   const valid = isValidDateKey(date);
   const entry = useEntry(id, date);
   const saveEntry = useSaveEntry();
+  const allEntries = useNotebookEntries(id);
+  const recentTexts = Object.values(allEntries)
+    .filter((e) => e.date !== date && e.text.trim())
+    .sort((a, b) => (a.date < b.date ? 1 : -1))
+    .slice(0, 3)
+    .map((e) => e.text.trim());
 
   const [text, setText] = useState(entry.text);
   const [saved, setSaved] = useState(false);
