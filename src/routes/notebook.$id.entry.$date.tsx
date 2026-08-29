@@ -370,6 +370,17 @@ function EntryPage() {
             )}
           </span>
         </div>
+        {!text.trim() && (
+          <JournalPromptCard
+            notebookId={id}
+            notebookName={notebook.name}
+            notebookType={notebook.type}
+            date={date}
+            dayLabel={`${LONG_DAYS[d.getDay()]}, ${LONG_MONTHS[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`}
+            recent={recentTexts}
+            onUse={(p) => setText(p + "\n\n")}
+          />
+        )}
         <div className="relative">
           <textarea
             value={text}
