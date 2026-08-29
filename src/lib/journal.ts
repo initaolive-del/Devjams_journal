@@ -114,7 +114,7 @@ function migrateLegacy(): Store | null {
       const e = old[k]!;
       entries[entryKey(nb.id, k)] = { ...e, notebookId: nb.id, status: null };
     }
-    return { notebooks: [nb], entries };
+    return { notebooks: [nb], entries, summaries: [] };
   } catch {
     return null;
   }
@@ -126,13 +126,17 @@ function readStore(): Store {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Store;
-      cache = { notebooks: parsed.notebooks ?? [], entries: parsed.entries ?? {} };
+      cache = {
+        notebooks: parsed.notebooks ?? [],
+        entries: parsed.entries ?? {},
+        summaries: parsed.summaries ?? [],
+      };
     } else {
-      cache = migrateLegacy() ?? { notebooks: [], entries: {} };
+      cache = migrateLegacy() ?? { notebooks: [], entries: {}, summaries: [] };
       if (cache.notebooks.length) persist(cache);
     }
   } catch {
-    cache = { notebooks: [], entries: {} };
+    cache = { notebooks: [], entries: {}, summaries: [] };
   }
   return cache;
 }
