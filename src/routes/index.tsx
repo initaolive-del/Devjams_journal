@@ -1,203 +1,131 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, NotebookPen } from "lucide-react";
-import { MOODS, toDateKey, useEntries } from "@/lib/journal";
+import { useState } from "react";
+import { Plus, X } from "lucide-react";
+import {
+  colorOf,
+  relativeTime,
+  useCreateNotebook,
+  useNotebooks,
+} from "@/lib/journal";
+import { NotebookForm } from "@/components/NotebookForm";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Memory Journal — Daily Photo, Mood & Voice Diary" },
+      { title: "Notebooks — Memory Journal" },
       {
         name: "description",
         content:
-          "A calm calendar journal. Tap any day to add a photo, log your mood, and write or speak your entry.",
+          "Keep separate notebooks for moods, habits and goals. Each one has its own calendar, photos and voice notes.",
       },
-      { property: "og:title", content: "Memory Journal — Daily Photo, Mood & Voice Diary" },
+      { property: "og:title", content: "Notebooks — Memory Journal" },
       {
         property: "og:description",
         content:
-          "A calm calendar journal. Tap any day to add a photo, log your mood, and write or speak your entry.",
+          "Keep separate notebooks for moods, habits and goals, each with its own calendar and daily entries.",
       },
     ],
   }),
-  component: CalendarHome,
+  component: NotebooksHome,
 });
 
-const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
-const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-function CalendarHome() {
+function NotebooksHome() {
+  const notebooks = useNotebooks();
+  const create = useCreateNotebook();
   const navigate = useNavigate();
-  const entries = useEntries();
-  const today = new Date();
-  const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
-  const [dir, setDir] = useState(1);
-  const [pickerOpen, setPickerOpen] = useState(false);
-
-  const year = cursor.getFullYear();
-  const month = cursor.getMonth();
-  const todayKey = toDateKey(today);
-
-  const days = useMemo(() => {
-    const first = new Date(year, month, 1);
-    const total = new Date(year, month + 1, 0).getDate();
-    const lead = first.getDay();
-    const cells: (number | null)[] = Array.from({ length: lead }, () => null);
-    for (let d = 1; d <= total; d++) cells.push(d);
-    while (cells.length % 7 !== 0) cells.push(null);
-    return cells;
-  }, [year, month]);
-
-  const monthEntryCount = useMemo(
-    () =>
-      Object.keys(entries).filter((k) =>
-        k.startsWith(`${year}-${String(month + 1).padStart(2, "0")}`)
-      ).length,
-    [entries, year, month]
-  );
-
-  const shift = (delta: number) => {
-    setDir(delta);
-    setCursor(new Date(year, month + delta, 1));
-  };
-
-  const years = Array.from({ length: 21 }, (_, i) => today.getFullYear() - 10 + i);
+  const [adding, setAdding] = useState(false);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-12 pt-8">
-      <header className="fade-slide-in mb-7 flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-semibold tracking-tight text-primary">
-            Memory Journal
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {monthEntryCount > 0
-              ? `${monthEntryCount} ${monthEntryCount === 1 ? "entry" : "entries"} this month`
-              : "No entries yet this month"}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/entry/$date", params: { date: todayKey } })}
-          className="flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-transform active:scale-95"
-        >
-          <NotebookPen className="size-4" aria-hidden />
-          Today
-        </button>
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-5 pb-16 pt-8">
+      <header className="fade-slide-in mb-6">
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-primary">
+          Your Notebooks
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {notebooks.length
+            ? `${notebooks.length} ${notebooks.length === 1 ? "notebook" : "notebooks"}`
+            : "Create your first notebook to start journalling"}
+        </p>
       </header>
 
-      <section className="rounded-3xl border border-border bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-        <div className="mb-4 flex items-center justify-between">
-          <button
-            type="button"
-            aria-label="Previous month"
-            onClick={() => shift(-1)}
-            className="grid size-10 place-items-center rounded-full text-primary transition-colors hover:bg-teal-soft"
-          >
-            <ChevronLeft className="size-5" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setPickerOpen((o) => !o)}
-            aria-expanded={pickerOpen}
-            className="rounded-full px-4 py-1.5 font-display text-lg font-semibold text-foreground transition-colors hover:bg-muted"
-          >
-            {MONTHS[month]} {year}
-          </button>
-
-          <button
-            type="button"
-            aria-label="Next month"
-            onClick={() => shift(1)}
-            className="grid size-10 place-items-center rounded-full text-primary transition-colors hover:bg-teal-soft"
-          >
-            <ChevronRight className="size-5" />
-          </button>
-        </div>
-
-        {pickerOpen && (
-          <div className="fade-slide-in mb-4 grid grid-cols-2 gap-3 rounded-2xl bg-muted p-3">
-            <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-              Month
-              <select
-                value={month}
-                onChange={(e) => setCursor(new Date(year, Number(e.target.value), 1))}
-                className="rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-              >
-                {MONTHS.map((m, i) => (
-                  <option key={m} value={i}>{m}</option>
-                ))}
-              </select>
-            </label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-              Year
-              <select
-                value={year}
-                onChange={(e) => setCursor(new Date(Number(e.target.value), month, 1))}
-                className="rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-              >
-                {years.map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
-            </label>
+      {adding ? (
+        <section className="fade-slide-in rounded-3xl border border-border bg-card p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold">New notebook</h2>
+            <button
+              type="button"
+              aria-label="Close"
+              onClick={() => setAdding(false)}
+              className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-muted"
+            >
+              <X className="size-4" />
+            </button>
           </div>
-        )}
+          <NotebookForm
+            submitLabel="Create notebook"
+            onCancel={() => setAdding(false)}
+            onSubmit={(draft) => {
+              const nb = create(draft);
+              setAdding(false);
+              navigate({ to: "/notebook/$id", params: { id: nb.id } });
+            }}
+          />
+        </section>
+      ) : (
+        <>
+          <ul className="flex flex-col gap-3">
+            {notebooks.map((n) => {
+              const c = colorOf(n.color);
+              return (
+                <li key={n.id} className="fade-slide-in">
+                  <button
+                    type="button"
+                    onClick={() => navigate({ to: "/notebook/$id", params: { id: n.id } })}
+                    className="flex w-full items-center gap-4 rounded-3xl border border-border bg-card p-4 text-left transition-transform active:scale-[0.98]"
+                  >
+                    <span
+                      className="grid size-14 shrink-0 place-items-center rounded-2xl text-2xl"
+                      style={{ background: c.swatch }}
+                      aria-hidden
+                    >
+                      {n.icon}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-display text-lg font-semibold text-foreground">
+                        {n.name}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        {n.entryCount} {n.entryCount === 1 ? "entry" : "entries"} ·{" "}
+                        {relativeTime(n.lastUpdated)}
+                      </span>
+                      <span className="mt-1.5 inline-block rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                        {n.type === "mood" ? "Mood" : `${n.labels[0]} / ${n.labels[1]}`}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
 
-        <div className="mb-2 grid grid-cols-7 gap-1">
-          {WEEKDAYS.map((d, i) => (
-            <div key={i} className="py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {d}
+          {notebooks.length === 0 && (
+            <div className="rounded-3xl border-2 border-dashed border-input bg-card p-10 text-center">
+              <p className="text-sm text-muted-foreground">
+                Notebooks keep different parts of your life apart — moods, habits, goals.
+              </p>
             </div>
-          ))}
-        </div>
+          )}
 
-        <div
-          key={`${year}-${month}`}
-          className="month-animate grid grid-cols-7 gap-1"
-          style={{ ["--month-dir" as string]: dir > 0 ? "24px" : "-24px" }}
-        >
-          {days.map((d, i) => {
-            if (d === null) return <div key={`e${i}`} className="aspect-square" />;
-            const key = toDateKey(new Date(year, month, d));
-            const entry = entries[key];
-            const isToday = key === todayKey;
-            const mood = entry?.mood ? MOODS.find((m) => m.id === entry.mood) : null;
-            return (
-              <button
-                key={key}
-                type="button"
-                onClick={() => navigate({ to: "/entry/$date", params: { date: key } })}
-                aria-label={`${MONTHS[month]} ${d}${entry ? ", has entry" : ""}`}
-                className={`calendar-cell ${
-                  isToday
-                    ? "bg-sand text-foreground ring-2 ring-ember"
-                    : entry
-                      ? "bg-secondary text-secondary-foreground"
-                      : "text-foreground"
-                }`}
-              >
-                <span>{d}</span>
-                <span className="flex h-3 items-center text-[10px] leading-none">
-                  {mood ? (
-                    mood.emoji
-                  ) : entry ? (
-                    <span className="block size-1.5 rounded-full bg-ember" />
-                  ) : null}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        Tap any day to add a photo, mood, and note.
-      </p>
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="mt-5 flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-transform active:scale-95"
+          >
+            <Plus className="size-4" aria-hidden />
+            Add Notebook
+          </button>
+        </>
+      )}
     </main>
   );
 }
