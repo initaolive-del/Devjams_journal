@@ -313,7 +313,7 @@ function NotebookCalendar() {
           notebookName={notebook.name}
           year={year}
           month={month}
-          monthLabel={MONTHS[month]}
+          monthLabel={MONTHS[month] ?? ""}
           entries={entries}
           onClose={() => setRecapOpen(false)}
         />
