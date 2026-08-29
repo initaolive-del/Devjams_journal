@@ -56,15 +56,31 @@ export const NOTEBOOK_ICONS = ["📓", "🌿", "☀️", "🌙", "💪", "📚",
 
 export const DEFAULT_STATUS_LABELS: [string, string] = ["Progressed", "Didn't Progress"];
 
+export type PeriodType = "weekly" | "monthly";
+
+export interface SummaryEntry {
+  id: string;
+  parentNotebookId: string;
+  periodType: PeriodType;
+  periodLabel: string;
+  periodStart: string; // YYYY-MM-DD
+  periodEnd: string; // YYYY-MM-DD
+  summaryText: string;
+  generatedAt: number;
+  breakdown: { label: string; count: number }[];
+}
+
 const KEY = "memory-journal-v2";
 const LEGACY_KEY = "memory-journal-entries-v1";
 
 interface Store {
   notebooks: Notebook[];
   entries: Record<string, JournalEntry>; // key: `${notebookId}::${date}`
+  summaries: SummaryEntry[];
 }
 
-const empty: Store = { notebooks: [], entries: {} };
+const empty: Store = { notebooks: [], entries: {}, summaries: [] };
+
 
 let cache: Store | null = null;
 const listeners = new Set<() => void>();
