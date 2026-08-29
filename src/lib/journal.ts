@@ -56,15 +56,31 @@ export const NOTEBOOK_ICONS = ["📓", "🌿", "☀️", "🌙", "💪", "📚",
 
 export const DEFAULT_STATUS_LABELS: [string, string] = ["Progressed", "Didn't Progress"];
 
+export type PeriodType = "weekly" | "monthly";
+
+export interface SummaryEntry {
+  id: string;
+  parentNotebookId: string;
+  periodType: PeriodType;
+  periodLabel: string;
+  periodStart: string; // YYYY-MM-DD
+  periodEnd: string; // YYYY-MM-DD
+  summaryText: string;
+  generatedAt: number;
+  breakdown: { label: string; count: number }[];
+}
+
 const KEY = "memory-journal-v2";
 const LEGACY_KEY = "memory-journal-entries-v1";
 
 interface Store {
   notebooks: Notebook[];
   entries: Record<string, JournalEntry>; // key: `${notebookId}::${date}`
+  summaries: SummaryEntry[];
 }
 
-const empty: Store = { notebooks: [], entries: {} };
+const empty: Store = { notebooks: [], entries: {}, summaries: [] };
+
 
 let cache: Store | null = null;
 const listeners = new Set<() => void>();
@@ -98,7 +114,7 @@ function migrateLegacy(): Store | null {
       const e = old[k]!;
       entries[entryKey(nb.id, k)] = { ...e, notebookId: nb.id, status: null };
     }
-    return { notebooks: [nb], entries };
+    return { notebooks: [nb], entries, summaries: [] };
   } catch {
     return null;
   }
@@ -110,13 +126,17 @@ function readStore(): Store {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Store;
-      cache = { notebooks: parsed.notebooks ?? [], entries: parsed.entries ?? {} };
+      cache = {
+        notebooks: parsed.notebooks ?? [],
+        entries: parsed.entries ?? {},
+        summaries: parsed.summaries ?? [],
+      };
     } else {
-      cache = migrateLegacy() ?? { notebooks: [], entries: {} };
+      cache = migrateLegacy() ?? { notebooks: [], entries: {}, summaries: [] };
       if (cache.notebooks.length) persist(cache);
     }
   } catch {
-    cache = { notebooks: [], entries: {} };
+    cache = { notebooks: [], entries: {}, summaries: [] };
   }
   return cache;
 }
@@ -263,8 +283,89 @@ export function useDeleteNotebook() {
     for (const [k, v] of Object.entries(store.entries)) {
       if (v.notebookId !== id) entries[k] = v;
     }
-    writeStore({ notebooks: store.notebooks.filter((n) => n.id !== id), entries });
+    writeStore({
+      notebooks: store.notebooks.filter((n) => n.id !== id),
+      entries,
+      summaries: store.summaries.filter((s) => s.parentNotebookId !== id),
+    });
   }, []);
+}
+
+/** Summaries for a notebook + cadence, most recent period first. */
+export function useSummaries(notebookId: string, periodType: PeriodType): SummaryEntry[] {
+  const store = useStore();
+  return useMemo(
+    () =>
+      store.summaries
+        .filter((s) => s.parentNotebookId === notebookId && s.periodType === periodType)
+        .sort((a, b) => (a.periodStart < b.periodStart ? 1 : -1)),
+    [store, notebookId, periodType]
+  );
+}
+
+export function useSaveSummary() {
+  return useCallback((summary: Omit<SummaryEntry, "id" | "generatedAt">) => {
+    const store = readStore();
+    const existing = store.summaries.find(
+      (s) =>
+        s.parentNotebookId === summary.parentNotebookId &&
+        s.periodType === summary.periodType &&
+        s.periodStart === summary.periodStart
+    );
+    const next: SummaryEntry = {
+      ...summary,
+      id: existing?.id ?? newId(),
+      generatedAt: Date.now(),
+    };
+    writeStore({
+      ...store,
+      summaries: existing
+        ? store.summaries.map((s) => (s.id === existing.id ? next : s))
+        : [...store.summaries, next],
+    });
+    return next;
+  }, []);
+}
+
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+const SHORT_MONTHS = MONTH_NAMES.map((m) => m.slice(0, 3));
+
+export interface Period {
+  periodType: PeriodType;
+  label: string;
+  start: string;
+  end: string;
+}
+
+/** The period (week starting Sunday, or calendar month) containing `d`, offset by `back` periods. */
+export function getPeriod(periodType: PeriodType, d: Date, back = 0): Period {
+  if (periodType === "weekly") {
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - d.getDay() - back * 7);
+    const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6);
+    return {
+      periodType,
+      label: `Week of ${SHORT_MONTHS[start.getMonth()]} ${start.getDate()}`,
+      start: toDateKey(start),
+      end: toDateKey(end),
+    };
+  }
+  const start = new Date(d.getFullYear(), d.getMonth() - back, 1);
+  const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+  return {
+    periodType,
+    label: `${MONTH_NAMES[start.getMonth()]} ${start.getFullYear()}`,
+    start: toDateKey(start),
+    end: toDateKey(end),
+  };
+}
+
+/** Recent selectable periods, most recent first. */
+export function recentPeriods(periodType: PeriodType, count = 6): Period[] {
+  const now = new Date();
+  return Array.from({ length: count }, (_, i) => getPeriod(periodType, now, i));
 }
 
 export function toDateKey(d: Date): string {
