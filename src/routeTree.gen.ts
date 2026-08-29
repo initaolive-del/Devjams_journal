@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EntryDateRouteImport } from './routes/entry.$date'
+import { Route as NotebookIdIndexRouteImport } from './routes/notebook.$id.index'
+import { Route as NotebookIdEntryDateRouteImport } from './routes/notebook.$id.entry.$date'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +24,55 @@ const EntryDateRoute = EntryDateRouteImport.update({
   path: '/entry/$date',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotebookIdIndexRoute = NotebookIdIndexRouteImport.update({
+  id: '/notebook/$id/',
+  path: '/notebook/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotebookIdEntryDateRoute = NotebookIdEntryDateRouteImport.update({
+  id: '/notebook/$id/entry/$date',
+  path: '/notebook/$id/entry/$date',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/entry/$date': typeof EntryDateRoute
+  '/notebook/$id/': typeof NotebookIdIndexRoute
+  '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/entry/$date': typeof EntryDateRoute
+  '/notebook/$id': typeof NotebookIdIndexRoute
+  '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/entry/$date': typeof EntryDateRoute
+  '/notebook/$id/': typeof NotebookIdIndexRoute
+  '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/entry/$date'
+  fullPaths:
+    '/' | '/entry/$date' | '/notebook/$id/' | '/notebook/$id/entry/$date'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/entry/$date'
-  id: '__root__' | '/' | '/entry/$date'
+  to: '/' | '/entry/$date' | '/notebook/$id' | '/notebook/$id/entry/$date'
+  id:
+    | '__root__'
+    | '/'
+    | '/entry/$date'
+    | '/notebook/$id/'
+    | '/notebook/$id/entry/$date'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   EntryDateRoute: typeof EntryDateRoute
+  NotebookIdIndexRoute: typeof NotebookIdIndexRoute
+  NotebookIdEntryDateRoute: typeof NotebookIdEntryDateRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +91,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntryDateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notebook/$id/': {
+      id: '/notebook/$id/'
+      path: '/notebook/$id'
+      fullPath: '/notebook/$id/'
+      preLoaderRoute: typeof NotebookIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notebook/$id/entry/$date': {
+      id: '/notebook/$id/entry/$date'
+      path: '/notebook/$id/entry/$date'
+      fullPath: '/notebook/$id/entry/$date'
+      preLoaderRoute: typeof NotebookIdEntryDateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   EntryDateRoute: EntryDateRoute,
+  NotebookIdIndexRoute: NotebookIdIndexRoute,
+  NotebookIdEntryDateRoute: NotebookIdEntryDateRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
