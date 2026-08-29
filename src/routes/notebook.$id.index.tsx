@@ -293,11 +293,32 @@ function NotebookCalendar() {
             );
           })}
         </div>
+        <button
+          type="button"
+          onClick={() => setRecapOpen(true)}
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sand px-5 py-2.5 text-sm font-semibold text-foreground transition-transform active:scale-95"
+        >
+          <LayoutGrid className="size-4 text-ember" aria-hidden />
+          Month in Pictures
+        </button>
       </section>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
         Tap any day to add a photo, {notebook.type === "mood" ? "mood" : "status"}, and note.
       </p>
+
+      {recapOpen && (
+        <MonthRecap
+          notebookId={id}
+          notebookName={notebook.name}
+          year={year}
+          month={month}
+          monthLabel={MONTHS[month]}
+          entries={entries}
+          onClose={() => setRecapOpen(false)}
+        />
+      )}
     </main>
+
   );
 }
