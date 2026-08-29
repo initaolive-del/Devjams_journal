@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as EntryDateRouteImport } from './routes/entry.$date'
 import { Route as NotebookIdIndexRouteImport } from './routes/notebook.$id.index'
 import { Route as NotebookIdSummaryRouteImport } from './routes/notebook.$id.summary'
 import { Route as NotebookIdEntryDateRouteImport } from './routes/notebook.$id.entry.$date'
@@ -18,11 +17,6 @@ import { Route as NotebookIdEntryDateRouteImport } from './routes/notebook.$id.e
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EntryDateRoute = EntryDateRouteImport.update({
-  id: '/entry/$date',
-  path: '/entry/$date',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotebookIdIndexRoute = NotebookIdIndexRouteImport.update({
@@ -43,14 +37,12 @@ const NotebookIdEntryDateRoute = NotebookIdEntryDateRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/entry/$date': typeof EntryDateRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id/': typeof NotebookIdIndexRoute
   '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/entry/$date': typeof EntryDateRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id': typeof NotebookIdIndexRoute
   '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
@@ -58,7 +50,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/entry/$date': typeof EntryDateRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id/': typeof NotebookIdIndexRoute
   '/notebook/$id/entry/$date': typeof NotebookIdEntryDateRoute
@@ -67,21 +58,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/entry/$date'
     | '/notebook/$id/summary'
     | '/notebook/$id/'
     | '/notebook/$id/entry/$date'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/entry/$date'
     | '/notebook/$id/summary'
     | '/notebook/$id'
     | '/notebook/$id/entry/$date'
   id:
     | '__root__'
     | '/'
-    | '/entry/$date'
     | '/notebook/$id/summary'
     | '/notebook/$id/'
     | '/notebook/$id/entry/$date'
@@ -89,7 +77,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  EntryDateRoute: typeof EntryDateRoute
   NotebookIdSummaryRoute: typeof NotebookIdSummaryRoute
   NotebookIdIndexRoute: typeof NotebookIdIndexRoute
   NotebookIdEntryDateRoute: typeof NotebookIdEntryDateRoute
@@ -102,13 +89,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/entry/$date': {
-      id: '/entry/$date'
-      path: '/entry/$date'
-      fullPath: '/entry/$date'
-      preLoaderRoute: typeof EntryDateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notebook/$id/': {
@@ -137,7 +117,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  EntryDateRoute: EntryDateRoute,
   NotebookIdSummaryRoute: NotebookIdSummaryRoute,
   NotebookIdIndexRoute: NotebookIdIndexRoute,
   NotebookIdEntryDateRoute: NotebookIdEntryDateRoute,
