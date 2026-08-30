@@ -31,16 +31,15 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
       "Reply as json with this shape: {\"summary\": string, \"tags\": string[]} where tags are 2-4 very short theme phrases (2-4 words each, no full sentences). Use an empty array if no clear themes stand out.",
     ].join("\n");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Reka AI chat completions endpoint (OpenAI-compatible, vision-capable).
+    const res = await fetch("https://api.reka.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-        "X-Lovable-AIG-SDK": "fetch",
+        "X-Api-Key": apiKey,
       },
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
-        response_format: { type: "json_object" },
+        model: "reka-flash",
         messages: [
           {
             role: "user",
