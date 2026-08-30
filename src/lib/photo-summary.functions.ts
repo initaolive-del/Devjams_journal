@@ -45,7 +45,7 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
         "X-Api-Key": apiKey,
       },
       body: JSON.stringify({
-        model: "reka-flash-3",
+        model: "reka-edge-2603",
         messages: [
           {
             role: "user",
