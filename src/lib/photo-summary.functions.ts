@@ -18,8 +18,15 @@ const schema = z.object({
 export const generatePhotoSummary = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured for this app.");
+    // Uses Reka AI (vision model) — key stored in Secrets as REKA_API_KEY, read server-side only.
+    const apiKey = process.env["REKA_API_KEY"];
+    if (!apiKey) {
+      console.error("[photo-summary] REKA_API_KEY is not set in secrets");
+      throw new Error("AI is not configured for this app.");
+    }
+    console.log(
+      `[photo-summary] Calling Reka with ${data.photos.length} photo(s), key prefix: ${apiKey.slice(0, 4)}...`
+    );
 
     const instruction = [
       `These photos come from someone's personal journal "${data.notebookName}", taken across ${data.monthLabel}.`,
@@ -30,16 +37,15 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
       "Reply as json with this shape: {\"summary\": string, \"tags\": string[]} where tags are 2-4 very short theme phrases (2-4 words each, no full sentences). Use an empty array if no clear themes stand out.",
     ].join("\n");
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Reka AI chat completions endpoint (OpenAI-compatible, vision-capable).
+    const res = await fetch("https://api.reka.ai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Lovable-API-Key": apiKey,
-        "X-Lovable-AIG-SDK": "fetch",
+        "X-Api-Key": apiKey,
       },
       body: JSON.stringify({
-        model: "google/gemini-3.7-flash",
-        response_format: { type: "json_object" },
+        model: "reka-edge-2603",
         messages: [
           {
             role: "user",
@@ -57,6 +63,12 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
+      // Log the exact Reka API error server-side for debugging.
+      console.error("[photo-summary] Reka API error", {
+        status: res.status,
+        statusText: res.statusText,
+        body: detail.slice(0, 1000),
+      });
       if (res.status === 429) throw new Error("Too many requests right now — try again shortly.");
       if (res.status === 402)
         throw new Error("AI credits are exhausted. Add credits in Lovable to keep generating.");
