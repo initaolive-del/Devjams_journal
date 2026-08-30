@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ApiPublicTestRekaRouteImport } from './routes/api/public/test-reka'
 import { Route as NotebookIdIndexRouteImport } from './routes/notebook.$id.index'
 import { Route as NotebookIdPicturesRouteImport } from './routes/notebook.$id.pictures'
 import { Route as NotebookIdSummaryRouteImport } from './routes/notebook.$id.summary'
@@ -19,11 +18,6 @@ import { Route as NotebookIdEntryDateRouteImport } from './routes/notebook.$id.e
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicTestRekaRoute = ApiPublicTestRekaRouteImport.update({
-  id: '/api/public/test-reka',
-  path: '/api/public/test-reka',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotebookIdIndexRoute = NotebookIdIndexRouteImport.update({
@@ -49,7 +43,6 @@ const NotebookIdEntryDateRoute = NotebookIdEntryDateRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/api/public/test-reka': typeof ApiPublicTestRekaRoute
   '/notebook/$id/pictures': typeof NotebookIdPicturesRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id/': typeof NotebookIdIndexRoute
@@ -57,7 +50,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/api/public/test-reka': typeof ApiPublicTestRekaRoute
   '/notebook/$id/pictures': typeof NotebookIdPicturesRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id': typeof NotebookIdIndexRoute
@@ -66,7 +58,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/api/public/test-reka': typeof ApiPublicTestRekaRoute
   '/notebook/$id/pictures': typeof NotebookIdPicturesRoute
   '/notebook/$id/summary': typeof NotebookIdSummaryRoute
   '/notebook/$id/': typeof NotebookIdIndexRoute
@@ -76,7 +67,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/api/public/test-reka'
     | '/notebook/$id/pictures'
     | '/notebook/$id/summary'
     | '/notebook/$id/'
@@ -84,7 +74,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/api/public/test-reka'
     | '/notebook/$id/pictures'
     | '/notebook/$id/summary'
     | '/notebook/$id'
@@ -92,7 +81,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/api/public/test-reka'
     | '/notebook/$id/pictures'
     | '/notebook/$id/summary'
     | '/notebook/$id/'
@@ -101,7 +89,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ApiPublicTestRekaRoute: typeof ApiPublicTestRekaRoute
   NotebookIdPicturesRoute: typeof NotebookIdPicturesRoute
   NotebookIdSummaryRoute: typeof NotebookIdSummaryRoute
   NotebookIdIndexRoute: typeof NotebookIdIndexRoute
@@ -115,13 +102,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/test-reka': {
-      id: '/api/public/test-reka'
-      path: '/api/public/test-reka'
-      fullPath: '/api/public/test-reka'
-      preLoaderRoute: typeof ApiPublicTestRekaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notebook/$id/': {
@@ -157,7 +137,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ApiPublicTestRekaRoute: ApiPublicTestRekaRoute,
   NotebookIdPicturesRoute: NotebookIdPicturesRoute,
   NotebookIdSummaryRoute: NotebookIdSummaryRoute,
   NotebookIdIndexRoute: NotebookIdIndexRoute,
