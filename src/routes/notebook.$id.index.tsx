@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, NotebookPen, Settings2, Trash2, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Images, LayoutGrid, NotebookPen, Settings2, Trash2, X } from "lucide-react";
 import {
   MOODS,
   colorOf,
