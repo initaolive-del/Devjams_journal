@@ -20,7 +20,13 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Uses Reka AI (vision model) — key stored in Secrets as REKA_API_KEY, read server-side only.
     const apiKey = process.env["REKA_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured for this app.");
+    if (!apiKey) {
+      console.error("[photo-summary] REKA_API_KEY is not set in secrets");
+      throw new Error("AI is not configured for this app.");
+    }
+    console.log(
+      `[photo-summary] Calling Reka with ${data.photos.length} photo(s), key prefix: ${apiKey.slice(0, 4)}...`
+    );
 
     const instruction = [
       `These photos come from someone's personal journal "${data.notebookName}", taken across ${data.monthLabel}.`,
@@ -39,7 +45,7 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
         "X-Api-Key": apiKey,
       },
       body: JSON.stringify({
-        model: "reka-flash",
+        model: "reka-edge-2603",
         messages: [
           {
             role: "user",
@@ -57,6 +63,12 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
+      // Log the exact Reka API error server-side for debugging.
+      console.error("[photo-summary] Reka API error", {
+        status: res.status,
+        statusText: res.statusText,
+        body: detail.slice(0, 1000),
+      });
       if (res.status === 429) throw new Error("Too many requests right now — try again shortly.");
       if (res.status === 402)
         throw new Error("AI credits are exhausted. Add credits in Lovable to keep generating.");
