@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ChevronLeft, ChevronRight, LayoutGrid, NotebookPen, Settings2, Trash2, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Images, LayoutGrid, NotebookPen, Settings2, Trash2, X } from "lucide-react";
 import {
   MOODS,
   colorOf,
@@ -299,13 +299,23 @@ function NotebookCalendar() {
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-full bg-sand px-5 py-2.5 text-sm font-semibold text-foreground transition-transform active:scale-95"
         >
           <LayoutGrid className="size-4 text-ember" aria-hidden />
-          Month in Pictures
+          Quick photo recap
         </button>
       </section>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
+      <Link
+        to="/notebook/$id/pictures"
+        params={{ id }}
+        className="mt-6 flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-primary transition-transform active:scale-95"
+      >
+        <Images className="size-4" aria-hidden />
+        Month in Pictures
+      </Link>
+
+      <p className="mt-4 text-center text-xs text-muted-foreground">
         Tap any day to add a photo, {notebook.type === "mood" ? "mood" : "status"}, and note.
       </p>
+
 
       {recapOpen && (
         <MonthRecap
