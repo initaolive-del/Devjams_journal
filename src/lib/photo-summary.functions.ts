@@ -20,7 +20,13 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     // Uses Reka AI (vision model) — key stored in Secrets as REKA_API_KEY, read server-side only.
     const apiKey = process.env["REKA_API_KEY"];
-    if (!apiKey) throw new Error("AI is not configured for this app.");
+    if (!apiKey) {
+      console.error("[photo-summary] REKA_API_KEY is not set in secrets");
+      throw new Error("AI is not configured for this app.");
+    }
+    console.log(
+      `[photo-summary] Calling Reka with ${data.photos.length} photo(s), key prefix: ${apiKey.slice(0, 4)}...`
+    );
 
     const instruction = [
       `These photos come from someone's personal journal "${data.notebookName}", taken across ${data.monthLabel}.`,
