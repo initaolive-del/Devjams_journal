@@ -57,6 +57,12 @@ export const generatePhotoSummary = createServerFn({ method: "POST" })
 
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
+      // Log the exact Reka API error server-side for debugging.
+      console.error("[photo-summary] Reka API error", {
+        status: res.status,
+        statusText: res.statusText,
+        body: detail.slice(0, 1000),
+      });
       if (res.status === 429) throw new Error("Too many requests right now — try again shortly.");
       if (res.status === 402)
         throw new Error("AI credits are exhausted. Add credits in Lovable to keep generating.");
