@@ -18,7 +18,8 @@ const schema = z.object({
 export const generatePhotoSummary = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => schema.parse(data))
   .handler(async ({ data }) => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
+    // Uses Reka AI (vision model) — key stored in Secrets as REKA_API_KEY, read server-side only.
+    const apiKey = process.env["REKA_API_KEY"];
     if (!apiKey) throw new Error("AI is not configured for this app.");
 
     const instruction = [
