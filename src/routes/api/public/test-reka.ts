@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/public/test-reka")({
           method: "POST",
           headers: { "Content-Type": "application/json", "X-Api-Key": apiKey },
           body: JSON.stringify({
-            model: "reka-flash",
+            model: "reka-flash-3",
             messages: [
               {
                 role: "user",
